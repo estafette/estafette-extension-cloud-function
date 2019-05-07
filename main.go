@@ -158,7 +158,21 @@ func main() {
 
 	if !params.DryRun {
 		logInfo("Deploying cloud function %v...", params.App)
-		runCommand("gcloud", []string{"functions", "deploy", params.App, "--runtime", params.Runtime, "trigger-http"})
+		runCommand("gcloud", []string{"functions", "deploy", params.App, "--memory", params.Memory, "--runtime", params.Runtime, "trigger-http"})
+
+		// gcloud functions deploy (NAME : --region=REGION)
+		// [--entry-point=ENTRY_POINT] [--memory=MEMORY] [--retry]
+		// [--runtime=RUNTIME] [--service-account=SERVICE_ACCOUNT]
+		// [--source=SOURCE] [--stage-bucket=STAGE_BUCKET] [--timeout=TIMEOUT]
+		// [--update-labels=[KEY=VALUE,...]]
+		// [--clear-env-vars | --env-vars-file=FILE_PATH
+		//   | --set-env-vars=[KEY=VALUE,...]
+		//   | --remove-env-vars=[KEY,...] --update-env-vars=[KEY=VALUE,...]]
+		// [--clear-labels | --remove-labels=[KEY,...]]
+		// [--trigger-bucket=TRIGGER_BUCKET | --trigger-http
+		//   | --trigger-topic=TRIGGER_TOPIC
+		//   | --trigger-event=EVENT_TYPE --trigger-resource=RESOURCE]
+		// [GCLOUD_WIDE_FLAG ...]
 
 		logInfo("Describing cloud function %v...", params.App)
 		runCommand("gcloud", []string{"functions", "describe", params.App})
