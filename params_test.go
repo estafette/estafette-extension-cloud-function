@@ -18,7 +18,45 @@ var (
 )
 
 func TestSetDefaults(t *testing.T) {
+	t.Run("DefaultsAppToGitNameIfAppParamIsEmptyAndAppLabelIsEmpty", func(t *testing.T) {
 
+		params := Params{
+			App: "",
+		}
+		gitName := "mygitrepo"
+		appLabel := ""
+
+		// act
+		params.SetDefaults(gitName, appLabel, "", "", "", map[string]string{})
+
+		assert.Equal(t, "mygitrepo", params.App)
+	})
+
+	t.Run("DefaultsAppToAppLabelIfEmpty", func(t *testing.T) {
+
+		params := Params{
+			App: "",
+		}
+		appLabel := "myapp"
+
+		// act
+		params.SetDefaults("", appLabel, "", "", "", map[string]string{})
+
+		assert.Equal(t, "myapp", params.App)
+	})
+
+	t.Run("KeepsAppIfNotEmpty", func(t *testing.T) {
+
+		params := Params{
+			App: "yourapp",
+		}
+		appLabel := "myapp"
+
+		// act
+		params.SetDefaults("", appLabel, "", "", "", map[string]string{})
+
+		assert.Equal(t, "yourapp", params.App)
+	})
 }
 
 func TestValidateRequiredProperties(t *testing.T) {

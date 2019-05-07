@@ -153,8 +153,16 @@ func main() {
 	logInfo("Setting gcloud project")
 	runCommand("gcloud", []string{"config", "set", "project", credential.AdditionalProperties.Project})
 
-	//gcloud functions deploy helloGET --runtime nodejs8 --trigger-http
+	logInfo("Setting gcloud project")
+	runCommand("gcloud", []string{"config", "set", "project", credential.AdditionalProperties.Project})
 
+	if !params.DryRun {
+		logInfo("Deploying cloud function %v...", params.App)
+		//gcloud functions deploy params.App --runtime params.Runtime --trigger-http
+
+		logInfo("Describing cloud function %v...", params.App)
+		// gcloud functions describe params.App
+	}
 }
 
 func handleError(err error) {
