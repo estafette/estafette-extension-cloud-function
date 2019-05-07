@@ -152,6 +152,9 @@ func main() {
 
 	logInfo("Setting gcloud project")
 	runCommand("gcloud", []string{"config", "set", "project", credential.AdditionalProperties.Project})
+
+	//gcloud functions deploy helloGET --runtime nodejs8 --trigger-http
+
 }
 
 func handleError(err error) {

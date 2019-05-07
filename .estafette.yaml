@@ -42,7 +42,7 @@ stages:
   test-alpha-version:
     image: extensions/cloud-function:${ESTAFETTE_BUILD_VERSION}
     credentials: gke-tooling
-    dryrun: true
+    runtime: go111
 
   push-to-docker-hub:
     image: extensions/docker:dev
