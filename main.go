@@ -158,10 +158,10 @@ func main() {
 
 	if !params.DryRun {
 		logInfo("Deploying cloud function %v...", params.App)
-		//gcloud functions deploy params.App --runtime params.Runtime --trigger-http
+		runCommand("gcloud", []string{"functions", "deploy", params.App, "--runtime", params.Runtime, "trigger-http"})
 
 		logInfo("Describing cloud function %v...", params.App)
-		// gcloud functions describe params.App
+		runCommand("gcloud", []string{"functions", "describe", params.App})
 	}
 }
 
