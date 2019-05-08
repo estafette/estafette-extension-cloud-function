@@ -42,8 +42,21 @@ stages:
   test-alpha-version:
     image: extensions/cloud-function:${ESTAFETTE_BUILD_VERSION}
     credentials: gke-tooling
+    app: mycloudfunction
+    region: europe-west1
     runtime: go111
+    timeout: 60
+    source: .
+    env:
+      MYENVVAR: somevalue
+      MYSECRET: estafette.secret(YjTy7bw294jSfUSt.xEPLb_pRjmVCLFosptSzmOeBwc63INN7bIcP)
     memory: 256MB
+    dryrun: true
+
+  test-alpha-version-minimal:
+    image: extensions/cloud-function:${ESTAFETTE_BUILD_VERSION}
+    credentials: gke-tooling
+    runtime: go111
     dryrun: true
 
   push-to-docker-hub:

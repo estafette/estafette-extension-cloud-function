@@ -11,9 +11,12 @@ type Params struct {
 	DryRun bool `json:"dryrun,omitempty"`
 
 	// app params
-	App     string `json:"app,omitempty"`
-	Runtime string `json:"runtime,omitempty"`
-	Memory  string `json:"memory,omitempty"`
+	App                  string                 `json:"app,omitempty"`
+	Runtime              string                 `json:"runtime,omitempty"`
+	Memory               string                 `json:"memory,omitempty"`
+	Source               string                 `json:"source,omitempty"`
+	TimeoutSeconds       int                    `json:"timeout,omitempty"`
+	EnvironmentVariables map[string]interface{} `json:"env,omitempty"`
 }
 
 // SetDefaults fills in empty fields with convention-based defaults
@@ -30,6 +33,16 @@ func (p *Params) SetDefaults(gitName, appLabel, buildVersion, releaseName, relea
 	// default memory to 256MB
 	if p.Memory == "" {
 		p.Memory = "256MB"
+	}
+
+	// default source to current directory
+	if p.Source == "" {
+		p.Source = "."
+	}
+
+	// default timeout to 60 seconds
+	if p.TimeoutSeconds <= 0 {
+		p.TimeoutSeconds = 60
 	}
 }
 
@@ -60,6 +73,10 @@ func (p *Params) ValidateRequiredProperties() (bool, []error, []string) {
 
 	if !inStringArray(p.Memory, supportedMemory) {
 		errors = append(errors, fmt.Errorf("Memory %v is not supported; set it to %v", p.Memory, strings.Join(supportedMemory, ", ")))
+	}
+
+	if p.TimeoutSeconds <= 0 || p.TimeoutSeconds > 540 {
+		errors = append(errors, fmt.Errorf("Timeout %v is not supported; set it between 0 and 540 seconds", p.Memory))
 	}
 
 	return len(errors) == 0, errors, warnings
