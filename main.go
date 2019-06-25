@@ -461,7 +461,6 @@ func main() {
 		// 				This variant is also available:
 
 		logInfo("Describing cloud function %v...", params.App)
-		
 
 		describeArguments := []string{
 			"functions",
