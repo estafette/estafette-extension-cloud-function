@@ -461,7 +461,13 @@ func main() {
 		// 				This variant is also available:
 
 		logInfo("Describing cloud function %v...", params.App)
-		runCommand("gcloud", []string{"functions", "describe", params.App})
+
+		describeArguments := []string{
+			"functions",
+			"describe", params.App,
+			"--region", credential.AdditionalProperties.Region}
+
+		runCommand("gcloud", describeArguments)
 	}
 }
 
