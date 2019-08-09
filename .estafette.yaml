@@ -65,8 +65,6 @@ stages:
     container: cloud-function
     repositories:
     - extensions
-    tags:
-    - dev
 
   slack-notify:
     image: extensions/slack-build-status:dev
