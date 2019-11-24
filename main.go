@@ -144,16 +144,16 @@ func main() {
 	}
 
 	logInfo("Authenticating to google cloud")
-	runCommand("gcloud", []string{"auth", "activate-service-account", saClientEmail, "--key-file", "/key-file.json"})
+	foundation.RunCommandWithArgs("gcloud", []string{"auth", "activate-service-account", saClientEmail, "--key-file", "/key-file.json"})
 
 	logInfo("Setting gcloud account")
-	runCommand("gcloud", []string{"config", "set", "account", saClientEmail})
+	foundation.RunCommandWithArgs("gcloud", []string{"config", "set", "account", saClientEmail})
 
 	logInfo("Setting gcloud project")
-	runCommand("gcloud", []string{"config", "set", "project", credential.AdditionalProperties.Project})
+	foundation.RunCommandWithArgs("gcloud", []string{"config", "set", "project", credential.AdditionalProperties.Project})
 
 	logInfo("Setting gcloud project")
-	runCommand("gcloud", []string{"config", "set", "project", credential.AdditionalProperties.Project})
+	foundation.RunCommandWithArgs("gcloud", []string{"config", "set", "project", credential.AdditionalProperties.Project})
 
 	// prepare to pass labels as argument
 	estafetteLabels = sanitizeLabels(estafetteLabels)
@@ -192,7 +192,7 @@ func main() {
 	} else {
 
 		logInfo("Deploying cloud function %v...", params.App)
-		runCommand("gcloud", arguments)
+		foundation.RunCommandWithArgs("gcloud", arguments)
 
 		// gcloud functions deploy (NAME : --region=REGION)
 		// [--entry-point=ENTRY_POINT] [--memory=MEMORY] [--retry]
@@ -465,30 +465,8 @@ func main() {
 			"describe", params.App,
 			"--region", credential.AdditionalProperties.Region}
 
-		runCommand("gcloud", describeArguments)
+		foundation.RunCommandWithArgs("gcloud", describeArguments)
 	}
-}
-
-func handleError(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func runCommand(command string, args []string) {
-	err := runCommandExtended(command, args)
-	handleError(err)
-}
-
-func runCommandExtended(command string, args []string) error {
-	logInfo("Running command '%v %v'...", command, strings.Join(args, " "))
-	cmd := exec.Command(command, args...)
-	cmd.Dir = "/estafette-work"
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
-	log.Println("")
-	return err
 }
 
 func getCommandOutput(command string, args []string) (string, error) {
