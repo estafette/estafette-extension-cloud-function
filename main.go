@@ -1,18 +1,18 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
-	"os/exec"
 	"regexp"
 	"runtime"
 	"strings"
 
 	"github.com/alecthomas/kingpin"
 	foundation "github.com/estafette/estafette-foundation"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -48,8 +48,11 @@ func main() {
 	// init log format from envvar ESTAFETTE_LOG_FORMAT
 	foundation.InitLoggingFromEnv(appgroup, app, version, branch, revision, buildDate)
 
+	// create context to cancel commands on sigterm
+	ctx := foundation.InitCancellationContext(context.Background())
+
 	// put all estafette labels in map
-	logInfo("Getting all estafette labels from envvars...")
+	log.Info().Msg("Getting all estafette labels from envvars...")
 	estafetteLabels := map[string]string{}
 	for _, e := range os.Environ() {
 		kvPair := strings.SplitN(e, "=", 2)
@@ -66,94 +69,94 @@ func main() {
 		}
 	}
 
-	logInfo("Unmarshalling credentials parameter...")
+	log.Info().Msg("Unmarshalling credentials parameter...")
 	var credentialsParam CredentialsParam
 	err := json.Unmarshal([]byte(*paramsJSON), &credentialsParam)
 	if err != nil {
-		log.Fatal("Failed unmarshalling credential parameter: ", err)
+		log.Fatal().Err(err).Msg("Failed unmarshalling credential parameter")
 	}
 
-	logInfo("Setting default for credential parameter...")
+	log.Info().Msg("Setting default for credential parameter...")
 	credentialsParam.SetDefaults(*releaseName)
 
-	logInfo("Validating required credential parameter...")
+	log.Info().Msg("Validating required credential parameter...")
 	valid, errors := credentialsParam.ValidateRequiredProperties()
 	if !valid {
-		log.Fatal("Not all valid fields are set: ", errors)
+		log.Fatal().Msgf("Not all valid fields are set: %v", errors)
 	}
 
-	logInfo("Unmarshalling injected credentials...")
+	log.Info().Msg("Unmarshalling injected credentials...")
 	var credentials []GKECredentials
 	err = json.Unmarshal([]byte(*credentialsJSON), &credentials)
 	if err != nil {
-		log.Fatal("Failed unmarshalling injected credentials: ", err)
+		log.Fatal().Err(err).Msg("Failed unmarshalling injected credentials")
 	}
 
-	logInfo("Checking if credential %v exists...", credentialsParam.Credentials)
+	log.Info().Msgf("Checking if credential %v exists...", credentialsParam.Credentials)
 	credential := GetCredentialsByName(credentials, credentialsParam.Credentials)
 	if credential == nil {
-		log.Fatalf("Credential with name %v does not exist.", credentialsParam.Credentials)
+		log.Fatal().Err(err).Msgf("Credential with name %v does not exist.", credentialsParam.Credentials)
 	}
 
 	var params Params
 	if credential.AdditionalProperties.Defaults != nil {
-		logInfo("Using defaults from credential %v...", credentialsParam.Credentials)
+		log.Info().Msgf("Using defaults from credential %v...", credentialsParam.Credentials)
 		params = *credential.AdditionalProperties.Defaults
 	}
 
-	logInfo("Unmarshalling parameters / custom properties...")
+	log.Info().Msg("Unmarshalling parameters / custom properties...")
 	err = json.Unmarshal([]byte(*paramsJSON), &params)
 	if err != nil {
-		log.Fatal("Failed unmarshalling parameters: ", err)
+		log.Fatal().Err(err).Msg("Failed unmarshalling parameters")
 	}
 
-	logInfo("Setting defaults for parameters that are not set in the manifest...")
+	log.Info().Msg("Setting defaults for parameters that are not set in the manifest...")
 	params.SetDefaults(*gitName, *appLabel, *buildVersion, *releaseName, *releaseAction, estafetteLabels)
 
-	logInfo("Validating required parameters...")
+	log.Info().Msg("Validating required parameters...")
 	valid, errors, warnings := params.ValidateRequiredProperties()
 	if !valid {
-		log.Fatal("Not all valid fields are set: ", errors)
+		log.Fatal().Err(err).Msg("Not all valid fields are set")
 	}
 
 	for _, warning := range warnings {
 		log.Printf("Warning: %s", warning)
 	}
 
-	logInfo("Retrieving service account email from credentials...")
+	log.Info().Msg("Retrieving service account email from credentials...")
 	var keyFileMap map[string]interface{}
 	err = json.Unmarshal([]byte(credential.AdditionalProperties.ServiceAccountKeyfile), &keyFileMap)
 	if err != nil {
-		log.Fatal("Failed unmarshalling service account keyfile: ", err)
+		log.Fatal().Err(err).Msg("Failed unmarshalling service account keyfile")
 	}
 	var saClientEmail string
 	if saClientEmailIntfc, ok := keyFileMap["client_email"]; !ok {
-		log.Fatal("Field client_email missing from service account keyfile")
+		log.Fatal().Err(err).Msg("Field client_email missing from service account keyfile")
 	} else {
 		if t, aok := saClientEmailIntfc.(string); !aok {
-			log.Fatal("Field client_email not of type string")
+			log.Fatal().Err(err).Msg("Field client_email not of type string")
 		} else {
 			saClientEmail = t
 		}
 	}
 
-	logInfo("Storing gke credential %v on disk...", credentialsParam.Credentials)
+	log.Info().Msgf("Storing gke credential %v on disk...", credentialsParam.Credentials)
 	err = ioutil.WriteFile("/key-file.json", []byte(credential.AdditionalProperties.ServiceAccountKeyfile), 0600)
 	if err != nil {
-		log.Fatal("Failed writing service account keyfile: ", err)
+		log.Fatal().Err(err).Msg("Failed writing service account keyfile")
 	}
 
-	logInfo("Authenticating to google cloud")
-	foundation.RunCommandWithArgs("gcloud", []string{"auth", "activate-service-account", saClientEmail, "--key-file", "/key-file.json"})
+	log.Info().Msg("Authenticating to google cloud")
+	foundation.RunCommandWithArgs(ctx, "gcloud", []string{"auth", "activate-service-account", saClientEmail, "--key-file", "/key-file.json"})
 
-	logInfo("Setting gcloud account")
-	foundation.RunCommandWithArgs("gcloud", []string{"config", "set", "account", saClientEmail})
+	log.Info().Msg("Setting gcloud account")
+	foundation.RunCommandWithArgs(ctx, "gcloud", []string{"config", "set", "account", saClientEmail})
 
-	logInfo("Setting gcloud project")
-	foundation.RunCommandWithArgs("gcloud", []string{"config", "set", "project", credential.AdditionalProperties.Project})
+	log.Info().Msg("Setting gcloud project")
+	foundation.RunCommandWithArgs(ctx, "gcloud", []string{"config", "set", "project", credential.AdditionalProperties.Project})
 
-	logInfo("Setting gcloud project")
-	foundation.RunCommandWithArgs("gcloud", []string{"config", "set", "project", credential.AdditionalProperties.Project})
+	log.Info().Msg("Setting gcloud project")
+	foundation.RunCommandWithArgs(ctx, "gcloud", []string{"config", "set", "project", credential.AdditionalProperties.Project})
 
 	// prepare to pass labels as argument
 	estafetteLabels = sanitizeLabels(estafetteLabels)
@@ -186,13 +189,13 @@ func main() {
 
 	if params.DryRun {
 
-		logInfo("Dry run cloud function %v deployment...", params.App)
-		logInfo("gcloud %v", arguments)
+		log.Info().Msgf("Dry run cloud function %v deployment...", params.App)
+		log.Info().Msgf("gcloud %v", arguments)
 
 	} else {
 
-		logInfo("Deploying cloud function %v...", params.App)
-		foundation.RunCommandWithArgs("gcloud", arguments)
+		log.Info().Msgf("Deploying cloud function %v...", params.App)
+		foundation.RunCommandWithArgs(ctx, "gcloud", arguments)
 
 		// gcloud functions deploy (NAME : --region=REGION)
 		// [--entry-point=ENTRY_POINT] [--memory=MEMORY] [--retry]
@@ -458,27 +461,15 @@ func main() {
 		// 		NOTES
 		// 				This variant is also available:
 
-		logInfo("Describing cloud function %v...", params.App)
+		log.Info().Msgf("Describing cloud function %v...", params.App)
 
 		describeArguments := []string{
 			"functions",
 			"describe", params.App,
 			"--region", credential.AdditionalProperties.Region}
 
-		foundation.RunCommandWithArgs("gcloud", describeArguments)
+		foundation.RunCommandWithArgs(ctx, "gcloud", describeArguments)
 	}
-}
-
-func getCommandOutput(command string, args []string) (string, error) {
-	logInfo("Getting output for command '%v %v'...", command, strings.Join(args, " "))
-	output, err := exec.Command(command, args...).Output()
-
-	return string(output), err
-}
-
-func logInfo(message string, args ...interface{}) {
-	formattedMessage := fmt.Sprintf(message, args...)
-	log.Printf("%v\n\n", formattedMessage)
 }
 
 // a valid label must be an empty string or consist of alphanumeric characters, '-', '_' or '.', and must start and end with an alphanumeric character (e.g. 'MyValue',  or 'my_value',  or '12345', regex used for validation is '(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?')
