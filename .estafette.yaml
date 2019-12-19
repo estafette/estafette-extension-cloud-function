@@ -40,6 +40,22 @@ stages:
     - extensions
     path: ./publish
 
+  check-container:
+    parallelStages:
+      check-efficiency:
+        image: extensions/docker:dev
+        action: dive
+        container: cloud-function
+        repositories:
+        - extensions
+
+      vulnerability-scan:
+        image: extensions/docker:dev
+        action: trivy
+        container: cloud-function
+        repositories:
+        - extensions
+
   test-alpha-version:
     image: extensions/cloud-function:${ESTAFETTE_BUILD_VERSION}
     credentials: gke-tooling
