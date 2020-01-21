@@ -14,6 +14,7 @@ type Params struct {
 	App                  string                 `json:"app,omitempty"`
 	Runtime              string                 `json:"runtime,omitempty"`
 	Memory               string                 `json:"memory,omitempty"`
+	ServiceAccount       string                 `json:serviceAccount,omitempty"`
 	Source               string                 `json:"source,omitempty"`
 	TimeoutSeconds       int                    `json:"timeout,omitempty"`
 	EnvironmentVariables map[string]interface{} `json:"env,omitempty"`

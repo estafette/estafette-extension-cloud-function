@@ -187,6 +187,10 @@ func main() {
 		arguments = append(arguments, "--set-env-vars", strings.Join(envvarParams, ","))
 	}
 
+	if params.ServiceAccount != "" {
+		arguments = append(arguments, "--service-account", params.ServiceAccount)
+	}
+
 	if params.DryRun {
 
 		log.Info().Msgf("Dry run cloud function %v deployment...", params.App)
