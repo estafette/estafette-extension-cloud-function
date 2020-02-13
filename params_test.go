@@ -12,7 +12,7 @@ var (
 	validParams = Params{
 		Runtime:        "go111",
 		Memory:         "256MB",
-		Trigger:        "trigger-http",
+		Trigger:        "http",
 		Source:         ".",
 		TimeoutSeconds: 60,
 	}
@@ -84,6 +84,30 @@ func TestSetDefaults(t *testing.T) {
 		params.SetDefaults("", "", "", "", "", map[string]string{})
 
 		assert.Equal(t, "128MB", params.Memory)
+	})
+
+	t.Run("DefaultsTriggerToHttp", func(t *testing.T) {
+
+		params := Params{
+			Trigger: "http",
+		}
+
+		// act
+		params.SetDefaults("", "", "", "", "", map[string]string{})
+
+		assert.Equal(t, "256MB", params.Memory)
+	})
+
+	t.Run("KeepsTriggerIfNotEmpty", func(t *testing.T) {
+        trigger := "bucket"
+		params := Params{
+			Trigger: trigger,
+		}
+
+		// act
+		params.SetDefaults("", "", "", "", "", map[string]string{})
+
+		assert.Equal(t, trigger, params.Trigger)
 	})
 
 	t.Run("DefaultsSourceToCurrentDirectory", func(t *testing.T) {
@@ -176,7 +200,7 @@ func TestValidateRequiredProperties(t *testing.T) {
 	t.Run("ReturnsTrueIfTriggerValueIsNotEmptyForTriggerBucket", func(t *testing.T) {
 
 		params := validParams
-		params.Trigger = "trigger-bucket"
+		params.Trigger = "bucket"
 		params.TriggerValue = "bucketName"
 
 		// act
@@ -189,7 +213,7 @@ func TestValidateRequiredProperties(t *testing.T) {
 	t.Run("ReturnsFalseIfTriggerIsNotSupported", func(t *testing.T) {
 
 		params := validParams
-		params.Trigger = "trigger-bucket"
+		params.Trigger = "bucket"
 
 		// act
 		valid, errors, _ := params.ValidateRequiredProperties()
@@ -201,7 +225,7 @@ func TestValidateRequiredProperties(t *testing.T) {
 	t.Run("ReturnsTrueIfTriggerIsSupported", func(t *testing.T) {
 
 		params := validParams
-		params.Trigger = "trigger-http"
+		params.Trigger = "http"
 
 		// act
 		valid, errors, _ := params.ValidateRequiredProperties()

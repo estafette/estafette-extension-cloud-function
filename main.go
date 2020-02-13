@@ -190,7 +190,7 @@ func main() {
 		arguments = append(arguments, "--service-account", params.ServiceAccount)
 	}
 
-	if params.Trigger == "--trigger-bucket" {
+	if params.Trigger == "bucket" {
 	    arguments = append(arguments, "--trigger-bucket", params.TriggerValue)
 	} else {
 	    arguments = append(arguments, "--trigger-http")

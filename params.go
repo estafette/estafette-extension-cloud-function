@@ -35,7 +35,7 @@ func (p *Params) SetDefaults(gitName, appLabel, buildVersion, releaseName, relea
 
 	// default trigger to http-trigger
 	if p.Trigger == "" {
-		p.Trigger = "trigger-http"
+		p.Trigger = "http"
 	}
 
 	// default memory to 256MB
@@ -84,16 +84,16 @@ func (p *Params) ValidateRequiredProperties() (bool, []error, []string) {
 	}
 
 	supportedTrigger := []string{
-		"trigger-http",
-		"trigger-bucket",
+		"http",
+		"bucket",
 	}
 
 	if !inStringArray(p.Trigger, supportedTrigger) {
 		errors = append(errors, fmt.Errorf("Trigger %v is not supported; set it to %v", p.Trigger, strings.Join(supportedTrigger, ", ")))
 	}
 
-	if p.Trigger == "trigger-bucket" && p.TriggerValue == "" {
-		errors = append(errors, fmt.Errorf("TriggerValue is required when Trigger is trigger-bucket; set TriggerValue as well"))
+	if p.Trigger == "bucket" && p.TriggerValue == "" {
+		errors = append(errors, fmt.Errorf("TriggerValue is required when Trigger is bucket; set TriggerValue as well"))
 	}
 
 	if p.TimeoutSeconds <= 0 || p.TimeoutSeconds > 540 {
