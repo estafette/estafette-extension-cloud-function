@@ -100,7 +100,7 @@ func TestSetDefaults(t *testing.T) {
 
 	t.Run("KeepsTriggerIfNotEmpty", func(t *testing.T) {
 
-        trigger := "bucket"
+        	trigger := "bucket"
 		params := Params{
 			Trigger: trigger,
 		}
