@@ -13,6 +13,8 @@ type Params struct {
 	// app params
 	App                  string                 `json:"app,omitempty"`
 	Runtime              string                 `json:"runtime,omitempty"`
+	Trigger              string                 `json:"trigger,omitempty"`
+	TriggerValue         string                 `json:"TriggerValue,omitempty"`
 	Memory               string                 `json:"memory,omitempty"`
 	ServiceAccount       string                 `json:serviceAccount,omitempty"`
 	Source               string                 `json:"source,omitempty"`
@@ -29,6 +31,11 @@ func (p *Params) SetDefaults(gitName, appLabel, buildVersion, releaseName, relea
 	}
 	if p.App == "" && appLabel != "" {
 		p.App = appLabel
+	}
+
+	// default trigger to http-trigger
+	if p.Trigger == "" {
+		p.Trigger = "trigger-http"
 	}
 
 	// default memory to 256MB
@@ -74,6 +81,19 @@ func (p *Params) ValidateRequiredProperties() (bool, []error, []string) {
 
 	if !inStringArray(p.Memory, supportedMemory) {
 		errors = append(errors, fmt.Errorf("Memory %v is not supported; set it to %v", p.Memory, strings.Join(supportedMemory, ", ")))
+	}
+
+	supportedTrigger := []string{
+		"trigger-http",
+		"trigger-bucket",
+	}
+
+	if !inStringArray(p.Trigger, supportedTrigger) {
+		errors = append(errors, fmt.Errorf("Trigger %v is not supported; set it to %v", p.Trigger, strings.Join(supportedTrigger, ", ")))
+	}
+
+	if p.Trigger == "trigger-bucket" && p.TriggerValue == "" {
+		errors = append(errors, fmt.Errorf("TriggerValue is required when Trigger is trigger-bucket; set TriggerValue as well"))
 	}
 
 	if p.TimeoutSeconds <= 0 || p.TimeoutSeconds > 540 {
