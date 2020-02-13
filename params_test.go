@@ -89,16 +89,17 @@ func TestSetDefaults(t *testing.T) {
 	t.Run("DefaultsTriggerToHttp", func(t *testing.T) {
 
 		params := Params{
-			Trigger: "http",
+			Trigger: "",
 		}
 
 		// act
 		params.SetDefaults("", "", "", "", "", map[string]string{})
 
-		assert.Equal(t, "256MB", params.Memory)
+		assert.Equal(t, "http", params.Trigger)
 	})
 
 	t.Run("KeepsTriggerIfNotEmpty", func(t *testing.T) {
+
         trigger := "bucket"
 		params := Params{
 			Trigger: trigger,
@@ -188,7 +189,7 @@ func TestValidateRequiredProperties(t *testing.T) {
 	t.Run("ReturnsFalseIfTriggerValueIsEmptyForTriggerBucket", func(t *testing.T) {
 
 		params := validParams
-		params.Trigger = "trigger"
+		params.Trigger = "bucket"
 
 		// act
 		valid, errors, _ := params.ValidateRequiredProperties()
@@ -213,7 +214,7 @@ func TestValidateRequiredProperties(t *testing.T) {
 	t.Run("ReturnsFalseIfTriggerIsNotSupported", func(t *testing.T) {
 
 		params := validParams
-		params.Trigger = "bucket"
+		params.Trigger = "trigger"
 
 		// act
 		valid, errors, _ := params.ValidateRequiredProperties()

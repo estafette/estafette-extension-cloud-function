@@ -14,7 +14,7 @@ type Params struct {
 	App                  string                 `json:"app,omitempty"`
 	Runtime              string                 `json:"runtime,omitempty"`
 	Trigger              string                 `json:"trigger,omitempty"`
-	TriggerValue         string                 `json:"TriggerValue,omitempty"`
+	TriggerValue         string                 `json:"triggerValue,omitempty"`
 	Memory               string                 `json:"memory,omitempty"`
 	ServiceAccount       string                 `json:serviceAccount,omitempty"`
 	Source               string                 `json:"source,omitempty"`
