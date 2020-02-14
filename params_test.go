@@ -12,6 +12,7 @@ var (
 	validParams = Params{
 		Runtime:        "go111",
 		Memory:         "256MB",
+		Trigger:        "http",
 		Source:         ".",
 		TimeoutSeconds: 60,
 	}
@@ -83,6 +84,31 @@ func TestSetDefaults(t *testing.T) {
 		params.SetDefaults("", "", "", "", "", map[string]string{})
 
 		assert.Equal(t, "128MB", params.Memory)
+	})
+
+	t.Run("DefaultsTriggerToHttp", func(t *testing.T) {
+
+		params := Params{
+			Trigger: "",
+		}
+
+		// act
+		params.SetDefaults("", "", "", "", "", map[string]string{})
+
+		assert.Equal(t, "http", params.Trigger)
+	})
+
+	t.Run("KeepsTriggerIfNotEmpty", func(t *testing.T) {
+
+        	trigger := "bucket"
+		params := Params{
+			Trigger: trigger,
+		}
+
+		// act
+		params.SetDefaults("", "", "", "", "", map[string]string{})
+
+		assert.Equal(t, trigger, params.Trigger)
 	})
 
 	t.Run("DefaultsSourceToCurrentDirectory", func(t *testing.T) {
@@ -160,6 +186,55 @@ func TestValidateRequiredProperties(t *testing.T) {
 		assert.True(t, len(errors) == 0)
 	})
 
+	t.Run("ReturnsFalseIfTriggerValueIsEmptyForTriggerBucket", func(t *testing.T) {
+
+		params := validParams
+		params.Trigger = "bucket"
+
+		// act
+		valid, errors, _ := params.ValidateRequiredProperties()
+
+		assert.False(t, valid)
+		assert.True(t, len(errors) > 0)
+	})
+
+	t.Run("ReturnsTrueIfTriggerValueIsNotEmptyForTriggerBucket", func(t *testing.T) {
+
+		params := validParams
+		params.Trigger = "bucket"
+		params.TriggerValue = "bucketName"
+
+		// act
+		valid, errors, _ := params.ValidateRequiredProperties()
+
+		assert.True(t, valid)
+		assert.True(t, len(errors) == 0)
+	})
+
+	t.Run("ReturnsFalseIfTriggerIsNotSupported", func(t *testing.T) {
+
+		params := validParams
+		params.Trigger = "trigger"
+
+		// act
+		valid, errors, _ := params.ValidateRequiredProperties()
+
+		assert.False(t, valid)
+		assert.True(t, len(errors) > 0)
+	})
+
+	t.Run("ReturnsTrueIfTriggerIsSupported", func(t *testing.T) {
+
+		params := validParams
+		params.Trigger = "http"
+
+		// act
+		valid, errors, _ := params.ValidateRequiredProperties()
+
+		assert.True(t, valid)
+		assert.True(t, len(errors) == 0)
+	})
+
 	t.Run("ReturnsFalseIfMemoryIsNotSupported", func(t *testing.T) {
 
 		params := validParams
@@ -172,7 +247,7 @@ func TestValidateRequiredProperties(t *testing.T) {
 		assert.True(t, len(errors) > 0)
 	})
 
-	t.Run("ReturnsTrueIfRuntimeIsSupported", func(t *testing.T) {
+	t.Run("ReturnsTrueIfMemoryIsSupported", func(t *testing.T) {
 
 		params := validParams
 		params.Memory = "512MB"

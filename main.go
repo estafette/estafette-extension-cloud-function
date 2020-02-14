@@ -173,8 +173,7 @@ func main() {
 		"--source", params.Source,
 		"--timeout", fmt.Sprintf("%vs", params.TimeoutSeconds),
 		"--runtime", params.Runtime,
-		"--update-labels", strings.Join(labelParams, ","),
-		"--trigger-http"}
+		"--update-labels", strings.Join(labelParams, ",")}
 
 	if len(params.EnvironmentVariables) > 0 {
 
@@ -189,6 +188,12 @@ func main() {
 
 	if params.ServiceAccount != "" {
 		arguments = append(arguments, "--service-account", params.ServiceAccount)
+	}
+
+	if params.Trigger == "bucket" {
+	    arguments = append(arguments, "--trigger-bucket", params.TriggerValue)
+	} else {
+	    arguments = append(arguments, "--trigger-http")
 	}
 
 	if params.DryRun {
