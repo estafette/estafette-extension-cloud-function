@@ -14,6 +14,7 @@ var (
 		Memory:         "256MB",
 		Trigger:        "http",
 		Source:         ".",
+		IngressSettings: "all",
 		TimeoutSeconds: 60,
 	}
 	validCredential = GKECredentials{
@@ -65,7 +66,7 @@ func TestSetDefaults(t *testing.T) {
 	t.Run("DefaultsMemoryTo256MB", func(t *testing.T) {
 
 		params := Params{
-			Memory: "256MB",
+			Memory: "",
 		}
 
 		// act
@@ -157,6 +158,30 @@ func TestSetDefaults(t *testing.T) {
 		params.SetDefaults("", "", "", "", "", map[string]string{})
 
 		assert.Equal(t, 30, params.TimeoutSeconds)
+	})
+
+	t.Run("DefaultsIngressSettingsToAll", func(t *testing.T) {
+
+		params := Params{
+			IngressSettings: "",
+		}
+
+		// act
+		params.SetDefaults("", "", "", "", "", map[string]string{})
+
+		assert.Equal(t, "all", params.IngressSettings)
+	})
+
+	t.Run("KeepsIngressSettingsIfNotEmpty", func(t *testing.T) {
+
+		params := Params{
+			IngressSettings: "internal-only",
+		}
+
+		// act
+		params.SetDefaults("", "", "", "", "", map[string]string{})
+
+		assert.Equal(t, "internal-only", params.IngressSettings)
 	})
 }
 
@@ -275,6 +300,30 @@ func TestValidateRequiredProperties(t *testing.T) {
 
 		params := validParams
 		params.TimeoutSeconds = 540
+
+		// act
+		valid, errors, _ := params.ValidateRequiredProperties()
+
+		assert.True(t, valid)
+		assert.True(t, len(errors) == 0)
+	})
+
+	t.Run("ReturnsFalseIfIngressSettingsIsNotSupported", func(t *testing.T) {
+
+		params := validParams
+		params.IngressSettings = "doodah"
+
+		// act
+		valid, errors, _ := params.ValidateRequiredProperties()
+
+		assert.False(t, valid)
+		assert.True(t, len(errors) > 0)
+	})
+
+	t.Run("ReturnsTrueIfIngressSettingsIsSupported", func(t *testing.T) {
+
+		params := validParams
+		params.IngressSettings = "internal-only"
 
 		// act
 		valid, errors, _ := params.ValidateRequiredProperties()

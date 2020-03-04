@@ -18,6 +18,7 @@ type Params struct {
 	Memory               string                 `json:"memory,omitempty"`
 	ServiceAccount       string                 `json:serviceAccount,omitempty"`
 	Source               string                 `json:"source,omitempty"`
+	IngressSettings      string                 `json:"ingressSettings,omitempty"`
 	TimeoutSeconds       int                    `json:"timeout,omitempty"`
 	EnvironmentVariables map[string]interface{} `json:"env,omitempty"`
 }
@@ -51,6 +52,11 @@ func (p *Params) SetDefaults(gitName, appLabel, buildVersion, releaseName, relea
 	// default timeout to 60 seconds
 	if p.TimeoutSeconds <= 0 {
 		p.TimeoutSeconds = 60
+	}
+
+	// default ingress-settings to all
+	if p.IngressSettings == "" {
+		p.IngressSettings = "all"
 	}
 }
 
@@ -98,6 +104,15 @@ func (p *Params) ValidateRequiredProperties() (bool, []error, []string) {
 
 	if p.TimeoutSeconds <= 0 || p.TimeoutSeconds > 540 {
 		errors = append(errors, fmt.Errorf("Timeout %v is not supported; set it between 0 and 540 seconds", p.Memory))
+	}
+
+	supportedIngressSettings := []string{
+		"all",
+		"internal-only",
+	}
+
+	if !inStringArray(p.IngressSettings, supportedIngressSettings) {
+		errors = append(errors, fmt.Errorf("IngressSettings %v is not supported; set it to %v", p.IngressSettings, strings.Join(supportedIngressSettings, ", ")))
 	}
 
 	return len(errors) == 0, errors, warnings

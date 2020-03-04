@@ -173,7 +173,8 @@ func main() {
 		"--source", params.Source,
 		"--timeout", fmt.Sprintf("%vs", params.TimeoutSeconds),
 		"--runtime", params.Runtime,
-		"--update-labels", strings.Join(labelParams, ",")}
+		"--update-labels", strings.Join(labelParams, ","),
+		"--ingress-settings", params.IngressSettings}
 
 	if len(params.EnvironmentVariables) > 0 {
 
