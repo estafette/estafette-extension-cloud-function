@@ -10,12 +10,13 @@ var (
 	trueValue   = true
 	falseValue  = false
 	validParams = Params{
-		Runtime:        "go111",
-		Memory:         "256MB",
-		Trigger:        "http",
-		Source:         ".",
+		Runtime:         "go111",
+		Memory:          "256MB",
+		Trigger:         "http",
+		Source:          ".",
 		IngressSettings: "all",
-		TimeoutSeconds: 60,
+		EgressSettings:  "private-ranges-only",
+		TimeoutSeconds:  60,
 	}
 	validCredential = GKECredentials{
 		Name: "gke-production",
@@ -101,7 +102,7 @@ func TestSetDefaults(t *testing.T) {
 
 	t.Run("KeepsTriggerIfNotEmpty", func(t *testing.T) {
 
-        	trigger := "bucket"
+		trigger := "bucket"
 		params := Params{
 			Trigger: trigger,
 		}
@@ -182,6 +183,30 @@ func TestSetDefaults(t *testing.T) {
 		params.SetDefaults("", "", "", "", "", map[string]string{})
 
 		assert.Equal(t, "internal-only", params.IngressSettings)
+	})
+
+	t.Run("DefaultsEgressSettingsToPrivateRangesOnly", func(t *testing.T) {
+
+		params := Params{
+			EgressSettings: "",
+		}
+
+		// act
+		params.SetDefaults("", "", "", "", "", map[string]string{})
+
+		assert.Equal(t, "private-ranges-only", params.EgressSettings)
+	})
+
+	t.Run("KeepsEgressSettingsIfNotEmpty", func(t *testing.T) {
+
+		params := Params{
+			EgressSettings: "all",
+		}
+
+		// act
+		params.SetDefaults("", "", "", "", "", map[string]string{})
+
+		assert.Equal(t, "all", params.EgressSettings)
 	})
 }
 
