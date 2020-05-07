@@ -16,11 +16,12 @@ type Params struct {
 	Trigger              string                 `json:"trigger,omitempty"`
 	TriggerValue         string                 `json:"triggerValue,omitempty"`
 	Memory               string                 `json:"memory,omitempty"`
-	ServiceAccount       string                 `json:serviceAccount,omitempty"`
+	ServiceAccount       string                 `json:"serviceAccount,omitempty"`
 	Source               string                 `json:"source,omitempty"`
 	IngressSettings      string                 `json:"ingressSettings,omitempty"`
 	TimeoutSeconds       int                    `json:"timeout,omitempty"`
 	EnvironmentVariables map[string]interface{} `json:"env,omitempty"`
+	AllowUnauthenticated bool                   `json:"allowUnauthenticated,omitempty"`
 }
 
 // SetDefaults fills in empty fields with convention-based defaults
