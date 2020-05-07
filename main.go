@@ -174,8 +174,15 @@ func main() {
 		"--timeout", fmt.Sprintf("%vs", params.TimeoutSeconds),
 		"--runtime", params.Runtime,
 		"--update-labels", strings.Join(labelParams, ","),
-		"--ingress-settings", params.IngressSettings,
-		"--egress-settings", params.EgressSettings}
+		"--ingress-settings", params.IngressSettings}
+
+	if params.EgressSettings != "private-ranges-only" {
+		arguments = append(arguments, []string{"--egress-settings", params.EgressSettings}...)
+	}
+
+	if params.VPCConnector != "" {
+		arguments = append(arguments, []string{"--vpc-connector", params.VPCConnector}...)
+	}
 
 	if len(params.EnvironmentVariables) > 0 {
 

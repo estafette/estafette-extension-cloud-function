@@ -23,6 +23,7 @@ type Params struct {
 	EnvironmentVariables map[string]interface{} `json:"env,omitempty"`
 	AllowUnauthenticated bool                   `json:"allowUnauthenticated,omitempty"`
 	EgressSettings       string                 `json:"egressSettings,omitempty"`
+	VPCConnector         string                 `json:"vpcConnector,omitempty"`
 }
 
 // SetDefaults fills in empty fields with convention-based defaults
