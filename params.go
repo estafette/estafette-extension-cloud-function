@@ -22,6 +22,7 @@ type Params struct {
 	TimeoutSeconds       int                    `json:"timeout,omitempty"`
 	EnvironmentVariables map[string]interface{} `json:"env,omitempty"`
 	AllowUnauthenticated bool                   `json:"allowUnauthenticated,omitempty"`
+	EgressSettings       string                 `json:"egressSettings,omitempty"`
 }
 
 // SetDefaults fills in empty fields with convention-based defaults
@@ -59,6 +60,11 @@ func (p *Params) SetDefaults(gitName, appLabel, buildVersion, releaseName, relea
 	if p.IngressSettings == "" {
 		p.IngressSettings = "all"
 	}
+
+	// default egress-settings to private-ranges-only
+	if p.EgressSettings == "" {
+		p.EgressSettings = "private-ranges-only"
+	}
 }
 
 // ValidateRequiredProperties checks whether all needed properties are set
@@ -71,7 +77,9 @@ func (p *Params) ValidateRequiredProperties() (bool, []error, []string) {
 		"nodejs8",
 		"nodejs10",
 		"python37",
+		"python38",
 		"go111",
+		"go113",
 	}
 
 	if !inStringArray(p.Runtime, supportedRuntimes) {
@@ -114,6 +122,15 @@ func (p *Params) ValidateRequiredProperties() (bool, []error, []string) {
 
 	if !inStringArray(p.IngressSettings, supportedIngressSettings) {
 		errors = append(errors, fmt.Errorf("IngressSettings %v is not supported; set it to %v", p.IngressSettings, strings.Join(supportedIngressSettings, ", ")))
+	}
+
+	supportedEgressSettings := []string{
+		"private-ranges-only",
+		"all",
+	}
+
+	if !inStringArray(p.EgressSettings, supportedEgressSettings) {
+		errors = append(errors, fmt.Errorf("EgressSettings %v is not supported; set it to %v", p.EgressSettings, strings.Join(supportedEgressSettings, ", ")))
 	}
 
 	return len(errors) == 0, errors, warnings
