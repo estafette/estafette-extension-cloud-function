@@ -39,6 +39,7 @@ stages:
     repositories:
     - extensions
     path: ./publish
+    severity: HIGH
 
   check-container:
     parallelStages:
@@ -49,12 +50,12 @@ stages:
         repositories:
         - extensions
 
-      vulnerability-scan:
-        image: extensions/docker:dev
-        action: trivy
-        container: cloud-function
-        repositories:
-        - extensions
+      # vulnerability-scan:
+      #   image: extensions/docker:dev
+      #   action: trivy
+      #   container: cloud-function
+      #   repositories:
+      #   - extensions
 
   test-alpha-version:
     image: extensions/cloud-function:${ESTAFETTE_BUILD_VERSION}
