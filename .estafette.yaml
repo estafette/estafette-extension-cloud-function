@@ -59,7 +59,7 @@ stages:
 
   test-alpha-version:
     image: extensions/cloud-function:${ESTAFETTE_BUILD_VERSION}
-    credentials: gke-tooling
+    credentials: gke-dev-common
     app: mycloudfunction
     region: europe-west1
     runtime: go111
@@ -73,7 +73,7 @@ stages:
 
   test-alpha-version-minimal:
     image: extensions/cloud-function:${ESTAFETTE_BUILD_VERSION}
-    credentials: gke-tooling
+    credentials: gke-dev-common
     runtime: go111
     dryrun: true
 
