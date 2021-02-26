@@ -513,15 +513,19 @@ func sanitizeLabel(value string) string {
 	// Valid label values must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z])
 	// with dashes (-), underscores (_), dots (.), and alphanumerics between.
 
+	// replace @ with -at-
+	reg := regexp.MustCompile(`@+`)
+	value = reg.ReplaceAllString(value, "-at-")
+
 	// replace all invalid characters with a hyphen
-	reg := regexp.MustCompile(`[^a-zA-Z0-9-_.]+`)
+	reg = regexp.MustCompile(`[^a-zA-Z0-9-_.]+`)
 	value = reg.ReplaceAllString(value, "-")
 
 	// replace double hyphens with a single one
 	value = strings.Replace(value, "--", "-", -1)
 
 	// ensure it starts with an alphanumeric character
-	reg = regexp.MustCompile(`^[-_.]+`)
+	reg = regexp.MustCompile(`^[^a-zA-Z0-9]+`)
 	value = reg.ReplaceAllString(value, "")
 
 	// maximize length at 63 characters
@@ -530,10 +534,10 @@ func sanitizeLabel(value string) string {
 	}
 
 	// ensure it ends with an alphanumeric character
-	reg = regexp.MustCompile(`[-_.]+$`)
+	reg = regexp.MustCompile(`[^a-zA-Z0-9]+$`)
 	value = reg.ReplaceAllString(value, "")
 
-	return value
+	return strings.ToLower(value)
 }
 
 func sanitizeLabels(labels map[string]string) (sanitizedLabels map[string]string) {
