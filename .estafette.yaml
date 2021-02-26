@@ -25,7 +25,7 @@ stages:
     image: extensions/docker:dev
     action: build
     inline: |
-      FROM gcr.io/google.com/cloudsdktool/cloud-sdk:328.0.0-alpine
+      FROM gcr.io/google.com/cloudsdktool/cloud-sdk:329.0.0-alpine
 
       LABEL maintainer="estafette.io" \
             description="The ${ESTAFETTE_GIT_NAME} component is an Estafette extension to deploy applications to a Kubernetes Engine cluster"
