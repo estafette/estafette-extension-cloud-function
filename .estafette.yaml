@@ -30,6 +30,11 @@ stages:
       LABEL maintainer="estafette.io" \
             description="The ${ESTAFETTE_GIT_NAME} component is an Estafette extension to deploy applications to a Kubernetes Engine cluster"
 
+      # fix vulnerability
+      RUN apk update \
+          && apk add --upgrade libldap \
+          && rm /var/cache/apk/*
+
       COPY ${ESTAFETTE_GIT_NAME} /
 
       ENV ESTAFETTE_LOG_FORMAT="console"
